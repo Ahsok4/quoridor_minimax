@@ -13,6 +13,7 @@ class Player:
     
     def get_board(self):
         return self.board
+    
 
     def move(self, x, y):
         self.board.get_piece(self.x, self.y).state = "empty"
