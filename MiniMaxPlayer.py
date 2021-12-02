@@ -46,7 +46,7 @@ class MiniMaxPlayer(Player):
 
 
     
-    def max_val_abp(self, opponent, depth):
+    def max_val_abp(self, opponent, alpha, beta, depth):
         if (depth == MAX_DEPTH):
             return self.evaluate(opponent), None
         
@@ -56,16 +56,19 @@ class MiniMaxPlayer(Player):
             
             self.play(action, is_evaluating=True)
             
-            m = opponent.min_val(self, depth+1)
+            m = opponent.min_val_abp(self, alpha, beta, depth+1)
             if (m[0] > v):
                 v = m[0]
                 best_action = action
-            
             self.undo_last_action()
+            
+            alpha = max(alpha, m[0])
+            if beta <= alpha:
+                break
             
         return v, best_action
     
-    def min_val_abp(self, opponent, depth):
+    def min_val_abp(self, opponent, alpha, beta, depth):
         if (depth == MAX_DEPTH):
             return self.evaluate(opponent), None
         
@@ -73,12 +76,16 @@ class MiniMaxPlayer(Player):
         best_action = None
         for action in self.get_legal_actions(opponent):        
             self.play(action, is_evaluating=True)
-            m = opponent.max_val(self, depth+1)
+            m = opponent.max_val_abp(self, alpha, beta, depth+1)
             if (m[0] < v):
                 v = m[0]
                 best_action = action
-                
+            
             self.undo_last_action()
+            beta = min(beta, m[0])
+            if beta <= alpha:
+                break
+            
             
         return v, best_action
 
@@ -139,6 +146,13 @@ class MiniMaxPlayer(Player):
         )
         return total_score
 
-    def get_best_action(self, opponent):
-        v, best_action = self.max_val(opponent, 0)
-        return best_action
+    def get_best_action(self, opponent, mode):
+        best_action = None
+        if mode == 'm':
+            v, best_action = self.max_val(opponent, 0)
+        elif mode == 'abp':
+            v, best_action = self.max_val_abp(opponent, -self.INFINITY, self.INFINITY, 0)
+        
+        
+        return best_action        
+        
