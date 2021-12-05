@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     walls_count = 0
     
-    algorithm_mode = 'abp'
+    algorithm_mode = 'table'
 
     while True:
         action = white_player.get_best_action(opponent=black_player, mode=algorithm_mode)
@@ -28,7 +28,7 @@ if __name__ == "__main__":
             break
         if action.split("#")[0] == "wall":
             walls_count += 1
-        sleep(0.3)
+        sleep(0.2)
         action = black_player.get_best_action(opponent=white_player, mode=algorithm_mode)
         
         
@@ -46,6 +46,6 @@ if __name__ == "__main__":
 
         if action.split("#")[0] == "wall":
             walls_count += 1
-        sleep(0.3)
+        sleep(0.2)
     print(f"walls count {walls_count}")
 

@@ -1,13 +1,19 @@
 from Player import Player
 from copy import deepcopy
 import math
+from random import random
+from decimal import *
+
 
 MAX_DEPTH = 2
 
 class MiniMaxPlayer(Player):
-    
     INFINITY = math.inf
     
+    #___________________________
+    #______simple minimax_______   
+    #___________________________
+
     def max_val(self, opponent, depth):
         if (depth == MAX_DEPTH):
             return self.evaluate(opponent), None
@@ -43,7 +49,80 @@ class MiniMaxPlayer(Player):
             self.undo_last_action()
             
         return v, best_action
+    
+    #____________________________
+    #______forward pruning_______
+    #____________________________
 
+    def max_val_fp(self, opponent, depth):
+        if (depth == MAX_DEPTH):
+            return self.evaluate(opponent), None
+        
+        v = -self.INFINITY
+        best_action = None
+        i = 1
+        for action in self.get_legal_actions(opponent):
+            x = random()
+            if (x*100 + math.sqrt(i) > 70):
+                
+                self.play(action, is_evaluating=True)
+                
+                m = opponent.min_val_fp(self, depth+1)
+                if (m[0] > v):
+                    v = m[0]
+                    best_action = action
+                
+                self.undo_last_action()
+            i+=1
+            
+        if best_action == None:
+            for action in self.get_legal_actions(opponent):
+                self.play(action, is_evaluating=True)
+                
+                m = opponent.min_val_fp(self, depth+1)
+                if (m[0] > v):
+                    v = m[0]
+                    best_action = action
+                
+                self.undo_last_action()
+        
+        return v, best_action
+    
+    def min_val_fp(self, opponent, depth):
+        if (depth == MAX_DEPTH):
+            return self.evaluate(opponent), None
+        
+        v = self.INFINITY
+        best_action = None
+        i = 1
+        for action in self.get_legal_actions(opponent):        
+            x = random()
+            if (x*100 + math.sqrt(i) > 70):
+                self.play(action, is_evaluating=True)
+                m = opponent.max_val_fp(self, depth+1)
+                if (m[0] < v):
+                    v = m[0]
+                    best_action = action
+                    
+                self.undo_last_action()
+            i+=1
+        
+        if best_action == None:
+            for action in self.get_legal_actions(opponent):        
+                self.play(action, is_evaluating=True)
+                m = opponent.max_val_fp(self, depth+1)
+                if (m[0] < v):
+                    v = m[0]
+                    best_action = action
+                    
+                self.undo_last_action()
+        
+        return v, best_action
+    
+    
+    #_______________________________
+    #______alpha beta pruning_______
+    #_______________________________
 
     
     def max_val_abp(self, opponent, alpha, beta, depth):
@@ -86,6 +165,66 @@ class MiniMaxPlayer(Player):
             if beta <= alpha:
                 break
             
+            
+        return v, best_action
+
+    
+    #____________________________
+    #_____alpha beta + table_____
+    #____________________________
+
+    
+    def max_val_abp_table(self, opponent, alpha, beta, depth, table):
+        if (depth == MAX_DEPTH):
+            return self.evaluate(opponent), None
+        
+        v = -self.INFINITY
+        best_action = None
+        for action in self.get_legal_actions(opponent):
+            self.play(action, is_evaluating=True)
+            
+            if table.get(hash) != None:
+                m = table.get(hash), None
+            else:
+                m = opponent.min_val_abp_table(self, alpha, beta, depth+1, table)
+                table[str(hash)] = m[0]
+                
+            if (m[0] > v):
+                v = m[0]
+                best_action = action
+            self.undo_last_action()
+            
+            alpha = max(alpha, m[0])
+            if beta <= alpha:
+                break
+            
+        return v, best_action
+    
+    def min_val_abp_table(self, opponent, alpha, beta, depth, table):
+        if (depth == MAX_DEPTH):
+            return self.evaluate(opponent), None
+        
+        v = self.INFINITY
+        best_action = None
+        for action in self.get_legal_actions(opponent):        
+            self.play(action, is_evaluating=True)
+            
+            hash = self.get_board().get_hash()
+            
+            if table.get(hash) != None:
+                m = table.get(hash), None
+            else:
+                m = opponent.max_val_abp_table(self, alpha, beta, depth+1, table)
+                table[str(hash)] = m[0]
+            
+            if (m[0] < v):
+                v = m[0]
+                best_action = action
+            
+            self.undo_last_action()
+            beta = min(beta, m[0])
+            if beta <= alpha:
+                break
             
         return v, best_action
 
@@ -141,9 +280,6 @@ class MiniMaxPlayer(Player):
         result = 0
         self_distance, opponent_distance = self.bfs(opponent)
         
-        # result += (17-self_distance)
-        # result -= 2* (17-opponent_distance)
-        
         if self_distance != 0:
             result += round(100/self_distance, 4)
         else:
@@ -160,14 +296,19 @@ class MiniMaxPlayer(Player):
         
         return result
     
-        
-
     def get_best_action(self, opponent, mode):
         best_action = None
         if mode == 'm':
             v, best_action = self.max_val(opponent, 0)
         elif mode == 'abp':
             v, best_action = self.max_val_abp(opponent, -self.INFINITY, self.INFINITY, 0)
+        elif mode == 'fp':
+            v, best_action = self.max_val_fp(opponent, 0)
+        elif mode == 'table':
+            table = dict()
+            v, best_action = self.max_val_abp_table(opponent, -self.INFINITY, self.INFINITY, 0, table)
+
+            
         
         
         return best_action        

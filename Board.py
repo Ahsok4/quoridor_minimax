@@ -173,3 +173,61 @@ class Board:
                         print(" ", end=" ")
                 print()
 
+    #return a string representing a state of map used in table
+    def get_hash(self):
+        VERTICAL_WALL = "\u2503"
+        HORIZONTAL_WALL = "\u2501"
+        WHITE_PLAYER = "\u265F"
+        BLACK_PLAYER = "\u2659"
+        SQUARE = "\u00B7"
+        result = ''
+        
+        for y in range(self.ROWS_NUM):
+            for x in range(self.COLS_NUM):
+                if x == 0:
+                    result = result + VERTICAL_WALL
+
+                piece = self.get_piece(x, y)
+
+                if piece.state == "empty":
+                    result = result + SQUARE
+                elif piece.state == "white":
+                    result = result + WHITE_PLAYER
+
+                else:
+                    result = result + BLACK_PLAYER
+
+                if piece.r_side == "block":
+                    result = result + VERTICAL_WALL
+                else:
+                    result = result + ' '
+
+            if y != self.ROWS_NUM - 1:
+                result = result + VERTICAL_WALL
+                for x in range(self.COLS_NUM):
+                    piece = self.get_piece(x, y)
+                    if piece.d_side == "block":
+                        end_char = (
+                            HORIZONTAL_WALL
+                            if self.get_piece(x + 1, y).d_side == "block"
+                            else " "
+                        )
+                        result = result + HORIZONTAL_WALL
+                    
+                    else:
+                        result = result + ' '
+                    if (
+                        piece.r_side == "block"
+                        and self.get_piece(x, y + 1).r_side == "block"
+                    ):
+                        result = result + VERTICAL_WALL
+                    elif (
+                        piece.d_side == "block"
+                        and self.get_piece(x + 1, y).d_side == "block"
+                    ):
+                        result = result + HORIZONTAL_WALL + HORIZONTAL_WALL
+                    else:
+                        result = result + ' '
+                
+        result = result + '\n'        
+        return result
