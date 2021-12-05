@@ -89,8 +89,6 @@ class MiniMaxPlayer(Player):
             
         return v, best_action
 
-    
-    
 
     def bfs(self, opponent: Player):
         self_distance = 0
@@ -139,12 +137,30 @@ class MiniMaxPlayer(Player):
 
         return self_distance, opponent_distance
 
-    def evaluate(self, opponent):
+    def evaluate(self, opponent:Player):
+        result = 0
         self_distance, opponent_distance = self.bfs(opponent)
-        total_score = (5 * opponent_distance - self_distance) * (
-            1 + self.walls_count / 2
-        )
-        return total_score
+        
+        # result += (17-self_distance)
+        # result -= 2* (17-opponent_distance)
+        
+        if self_distance != 0:
+            result += round(100/self_distance, 4)
+        else:
+            result += 1000
+            
+            
+        if opponent_distance != 0:
+            result -= round(50/opponent_distance, 4)
+        else:
+            result -= 500
+            
+        result += (self.walls_count - opponent.walls_count)*10
+        result -= self.walls_count * 5
+        
+        return result
+    
+        
 
     def get_best_action(self, opponent, mode):
         best_action = None
