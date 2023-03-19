@@ -4,4 +4,4 @@
 
 ##### With some modifications, such as alpha-beta pruning, the Minimax algorithm is implemented to play the Quoridor game.
 
-![Alt text](https://github.com/Arya-Ebrahimi/Quoridor_Minimax/tree/master/images/1.png?raw=true)
+![Alt text](https://github.com/Arya-Ebrahimi/Quoridor_Minimax/blob/master/images/1.png?raw=true)
